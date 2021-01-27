@@ -7,6 +7,7 @@ body {
   display: flex;
   justify-content: space-between;
   position: relative;
+  margin: 10px;
 }
 .todo-container > div {
   height: auto;
@@ -23,4 +24,24 @@ body {
   position: absolute;
   bottom: 4px;
   left: -20px;
+}
+
+.top-priority {
+  background-color: rgb(255, 125, 125);
+}
+
+.second-priority {
+  background-color: rgb(255, 162, 125);
+}
+
+.third-priority {
+  background-color: rgb(255, 199, 125);
+}
+
+.fourth-priority {
+  background-color: rgb(216, 255, 125);
+}
+
+.fifth-priority {
+  background-color: rgb(125, 255, 136);
 }

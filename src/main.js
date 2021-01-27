@@ -34,7 +34,7 @@ const addToList = function (inputValue, priority) {
   todoContainer.classList.add("todo-container");
   listSection.appendChild(todoContainer);
 
-  // adding data-percentage to sort them later
+  // adding data-percentage and class to sort them later by priority
   todoContainer.setAttribute("data-percentage", priority);
 
   // adding a check box
@@ -57,6 +57,19 @@ const addToList = function (inputValue, priority) {
   const todoPriority = document.createElement("div");
   todoPriority.classList.add("todo-priority");
   todoContainer.appendChild(todoPriority);
+
+  //giving the item another class to style him by class
+  if (priority === "1") {
+    todoContainer.classList.add("top-priority");
+  } else if (priority === "2") {
+    todoContainer.classList.add("second-priority");
+  } else if (priority === "3") {
+    todoContainer.classList.add("third-priority");
+  } else if (priority === "4") {
+    todoContainer.classList.add("fourth-priority");
+  } else {
+    todoContainer.classList.add("fifth-priority");
+  }
 
   //adding value to each div
   todoText.textContent = inputValue;
@@ -88,5 +101,3 @@ sortButton.addEventListener("click", function () {
     })
     .appendTo(warpingDiv);
 });
-
-//sort button to sort the list by priority
