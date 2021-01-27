@@ -1,13 +1,15 @@
 //get the value of the input
 const takeInput = function () {
   let inputValue = document.getElementById("text-input").value;
-  addToList(inputValue);
+  let priority = document.getElementById("priority-selector").value;
   document.getElementById("text-input").value = "";
   document.getElementById("text-input").focus();
+  console.log(inputValue);
+  addToList(inputValue, priority);
 };
 
 //giving the item a div
-const addToList = function (inputValue) {
+const addToList = function (inputValue, priority) {
   const listSection = document.querySelector("#view-section");
   const todoContainer = document.createElement("div");
   todoContainer.classList.add("todo-container");
@@ -35,6 +37,7 @@ const addToList = function (inputValue) {
     date.getMinutes() +
     ":" +
     date.getSeconds();
+  todoPriority.textContent = priority;
 };
 
 //add button to add the item to the list
