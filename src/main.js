@@ -105,5 +105,9 @@ sortButton.addEventListener("click", function () {
 //adding a delete button
 const deleteButton = document.getElementById("delete-button");
 deleteButton.addEventListener("click", function () {
-  $(".taskCheck:checked").closest(".todo-container").remove();
+  let confirmation = confirm("Are you sure you want to delete this items?");
+  if (confirmation === true) {
+    $(".taskCheck:checked").closest(".todo-container").remove();
+  }
+  return;
 });

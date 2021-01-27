@@ -45,3 +45,10 @@ body {
 .fifth-priority {
   background-color: rgb(125, 255, 136);
 }
+
+#delete-section {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  text-align: center;
+}
