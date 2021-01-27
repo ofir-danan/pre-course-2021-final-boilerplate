@@ -101,3 +101,9 @@ sortButton.addEventListener("click", function () {
     })
     .appendTo(warpingDiv);
 });
+
+//adding a delete button
+const deleteButton = document.getElementById("delete-button");
+deleteButton.addEventListener("click", function () {
+  $(".taskCheck:checked").closest(".todo-container").remove();
+});
