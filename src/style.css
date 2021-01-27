@@ -1,0 +1,26 @@
+body {
+  font-family: "Raleway", sans-serif;
+  padding-left: 15%;
+  padding-right: 15%;
+}
+.todo-container {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+.todo-container > div {
+  height: auto;
+  min-width: 200px;
+  max-width: 300px;
+  margin: 5px;
+}
+
+#control-section {
+  text-align: center;
+}
+
+.taskCheck {
+  position: absolute;
+  bottom: 4px;
+  left: -20px;
+}
