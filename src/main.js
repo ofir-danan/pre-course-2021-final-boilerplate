@@ -29,27 +29,36 @@ const addCounter = function () {
 const addToList = function (inputValue, priority) {
   const listSection = document.querySelector("#view-section");
 
+  // creating the container div
   const todoContainer = document.createElement("div");
   todoContainer.classList.add("todo-container");
   listSection.appendChild(todoContainer);
 
+  // adding data-percentage to sort them later
+  todoContainer.setAttribute("data-percentage", priority);
+
+  // adding a check box
   const taskCheck = document.createElement("input");
   taskCheck.setAttribute("type", "checkbox");
   taskCheck.className = "taskCheck";
   todoContainer.appendChild(taskCheck);
 
+  // adding the text
   const todoText = document.createElement("div");
   todoText.classList.add("todo-text");
   todoContainer.appendChild(todoText);
 
+  // adding the time
   const todoCreatedAt = document.createElement("div");
   todoCreatedAt.classList.add("todo-created-at");
   todoContainer.appendChild(todoCreatedAt);
 
+  // adding the priority
   const todoPriority = document.createElement("div");
   todoPriority.classList.add("todo-priority");
   todoContainer.appendChild(todoPriority);
 
+  //adding value to each div
   todoText.textContent = inputValue;
   todoCreatedAt.textContent = getDate();
   todoPriority.textContent = priority;
@@ -67,6 +76,17 @@ input.addEventListener("keyup", function (event) {
     document.getElementById("add-button").click();
   }
 });
-//counter element with the current num of items
+
+//adding a sorting function
+const sortButton = document.getElementById("sort-button");
+sortButton.addEventListener("click", function () {
+  let warpingDiv = $("#view-section");
+  warpingDiv
+    .find(".todo-container")
+    .sort(function (a, b) {
+      return +a.dataset.percentage - +b.dataset.percentage;
+    })
+    .appendTo(warpingDiv);
+});
 
 //sort button to sort the list by priority
