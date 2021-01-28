@@ -6,7 +6,9 @@ console.log(itemsFromLocalStorage);
 let counterFromLocalStorage = JSON.parse(localStorage.getItem("counter"));
 const listSection = document.querySelector("#view-section");
 window.addEventListener("DOMContentLoaded", function () {
+  if (itemsFromLocalStorage === null) return;
   for (let i = 0; i < itemsFromLocalStorage.length; i++) {
+    itemsArray = itemsFromLocalStorage;
     //add the container div
     const todoContainer = document.createElement("div");
     todoContainer.classList.add("todo-container");
