@@ -14,26 +14,28 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   </head>
   <body>
-    <section id="control-section">
-      <h1>TO-DO List</h1>
-      <h3>Task Amount : <span id="counter">0</span></h3>
-      <input type="text" id="text-input" placeholder="Type Your Task Here!" />
-      <select name="priority-selector" id="priority-selector">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select>
-      <p>Select the priority level of your task by the scale of 1 to 5</p>
-      <p>1 stands for task that's very important and 5 is not so much</p>
-      <br />
-      <button id="add-button">Add</button>
-      <button id="sort-button">Sort</button>
-    </section>
-    <section id="view-section"></section>
-    <div id="delete-section">
-      <button id="delete-button">Delete</button>
+    <div id="body-div">
+      <section id="control-section">
+        <h1>TO-DO List</h1>
+        <h3>Task Amount : <span id="counter"></span></h3>
+        <input type="text" id="text-input" placeholder="Type Your Task Here!" />
+        <select name="priority-selector" id="priority-selector">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+        <p>Select the priority level of your task by the scale of 1 to 5</p>
+        <p>1 stands for task that's very important and 5 is not so much</p>
+        <br />
+        <button id="add-button">Add</button>
+        <button id="sort-button">Sort</button>
+      </section>
+      <section id="view-section"></section>
+      <div id="delete-section">
+        <button id="delete-button">Delete</button>
+      </div>
     </div>
     <script src="./main.js"></script>
   </body>

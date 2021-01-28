@@ -1,3 +1,45 @@
+let count = 1;
+let itemsArray = [];
+let itemsFromLocalStorage = JSON.parse(localStorage.getItem("items"));
+const listSection = document.querySelector("#view-section");
+
+console.log(itemsFromLocalStorage);
+window.addEventListener("DOMContentLoaded", function () {
+  for (let i = 0; i < itemsFromLocalStorage.length; i++) {
+    const todoContainer = document.createElement("div");
+    todoContainer.classList.add("todo-container");
+    listSection.appendChild(todoContainer);
+
+    // adding a check box
+    const taskCheck = document.createElement("input");
+    taskCheck.setAttribute("type", "checkbox");
+    taskCheck.className = "taskCheck";
+    todoContainer.appendChild(taskCheck);
+
+    // adding the text
+    const todoText = document.createElement("div");
+    todoText.classList.add("todo-text");
+    todoContainer.appendChild(todoText);
+
+    // adding the time
+    const todoCreatedAt = document.createElement("div");
+    todoCreatedAt.classList.add("todo-created-at");
+    todoContainer.appendChild(todoCreatedAt);
+
+    // adding the priority
+    const todoPriority = document.createElement("div");
+    todoPriority.classList.add("todo-priority");
+    todoContainer.appendChild(todoPriority);
+
+    //add counter
+    const counter = document.getElementById("counter");
+
+    todoText.innerText = itemsFromLocalStorage[i]["todo-text"];
+    todoCreatedAt.innerText = itemsFromLocalStorage[i]["todo-created-at"];
+    todoPriority.innerText = itemsFromLocalStorage[i]["todo-priority"];
+    counter.innerText = itemsFromLocalStorage[i]["todo-counter"];
+  }
+});
 //get the value of the input and his priority
 const takeInput = function () {
   let inputValue = document.getElementById("text-input").value;
@@ -5,30 +47,29 @@ const takeInput = function () {
   document.getElementById("text-input").value = "";
   document.getElementById("text-input").focus();
   addToList(inputValue, priority);
-  addCounter();
-};
-
-//get the date in more readable way
-const getDate = function () {
-  const time = new Date();
-  const date = `${time.getDate()}/${
-    time.getMonth() + 1
-  }/${time.getFullYear()} ${time.getHours()}:${
-    time.getMinutes() > 10 ? time.getMinutes() : `0${time.getMinutes()}`
-  }:${time.getSeconds() > 10 ? time.getSeconds() : `0${time.getSeconds()}`}`;
-  return date;
+  addCounter(count);
+  count++;
 };
 
 //adding to the counter
-const addCounter = function () {
+const addCounter = function (count) {
   const counter = document.getElementById("counter");
-  counter.textContent = Number(counter.textContent) + 1;
+  counter.innerHTML = count;
 };
-
 //giving the item a div
 const addToList = function (inputValue, priority) {
-  const listSection = document.querySelector("#view-section");
-
+  //get the date in more readable way
+  const getDate = function () {
+    const time = new Date();
+    const date = `${
+      time.getDate() > 10 ? time.getDate() : `0${time.getDate()}`
+    }-
+    ${time.getMonth() > 10 ? time.getMonth() : `0${time.getMonth() + 1}`}
+    -${time.getFullYear()}   ${time.getHours()}:${
+      time.getMinutes() > 10 ? time.getMinutes() : `0${time.getMinutes()}`
+    }:${time.getSeconds() > 10 ? time.getSeconds() : `0${time.getSeconds()}`}`;
+    return date;
+  };
   // creating the container div
   const todoContainer = document.createElement("div");
   todoContainer.classList.add("todo-container");
@@ -75,6 +116,17 @@ const addToList = function (inputValue, priority) {
   todoText.textContent = inputValue;
   todoCreatedAt.textContent = getDate();
   todoPriority.textContent = priority;
+
+  //push to localStorage
+  let itemsObject = {
+    "todo-text": inputValue,
+    "todo-created-at": new Date(),
+    "todo-priority": priority,
+    "todo-counter": count,
+  };
+  itemsArray.push(itemsObject);
+  let changeToJson = JSON.stringify(itemsArray);
+  localStorage.setItem("items", changeToJson);
 };
 
 //add button to add the item to the list

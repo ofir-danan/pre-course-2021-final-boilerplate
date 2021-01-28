@@ -3,6 +3,7 @@ body {
   padding-left: 15%;
   padding-right: 15%;
 }
+
 .todo-container {
   display: flex;
   justify-content: space-between;
@@ -72,10 +73,8 @@ button:hover {
 #text-input {
   font-family: inherit;
   border: 0;
-  border-bottom: 2px solid $gray;
   outline: 0;
   font-size: 1.3rem;
-  color: $white;
   padding: 7px 0;
   background: transparent;
   transition: border-color 0.2s;
