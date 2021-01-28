@@ -1,14 +1,22 @@
-let count = 1;
+let counter = 0;
+localStorage.setItem("counter", counter);
 let itemsArray = [];
 let itemsFromLocalStorage = JSON.parse(localStorage.getItem("items"));
-const listSection = document.querySelector("#view-section");
-
 console.log(itemsFromLocalStorage);
+let counterFromLocalStorage = JSON.parse(localStorage.getItem("counter"));
+const listSection = document.querySelector("#view-section");
 window.addEventListener("DOMContentLoaded", function () {
   for (let i = 0; i < itemsFromLocalStorage.length; i++) {
+    //add the container div
     const todoContainer = document.createElement("div");
     todoContainer.classList.add("todo-container");
     listSection.appendChild(todoContainer);
+
+    // adding data-percentage and class to sort them later by priority
+    todoContainer.setAttribute(
+      "data-percentage",
+      itemsFromLocalStorage[i]["todo-priority"]
+    );
 
     // adding a check box
     const taskCheck = document.createElement("input");
@@ -31,13 +39,10 @@ window.addEventListener("DOMContentLoaded", function () {
     todoPriority.classList.add("todo-priority");
     todoContainer.appendChild(todoPriority);
 
-    //add counter
-    const counter = document.getElementById("counter");
-
     todoText.innerText = itemsFromLocalStorage[i]["todo-text"];
     todoCreatedAt.innerText = itemsFromLocalStorage[i]["todo-created-at"];
     todoPriority.innerText = itemsFromLocalStorage[i]["todo-priority"];
-    counter.innerText = itemsFromLocalStorage[i]["todo-counter"];
+    // document.getElementById("todo-counter").innerText = counterFromLocalStorage;
   }
 });
 //get the value of the input and his priority
@@ -47,15 +52,8 @@ const takeInput = function () {
   document.getElementById("text-input").value = "";
   document.getElementById("text-input").focus();
   addToList(inputValue, priority);
-  addCounter(count);
-  count++;
 };
 
-//adding to the counter
-const addCounter = function (count) {
-  const counter = document.getElementById("counter");
-  counter.innerHTML = count;
-};
 //giving the item a div
 const addToList = function (inputValue, priority) {
   //get the date in more readable way
@@ -122,11 +120,12 @@ const addToList = function (inputValue, priority) {
     "todo-text": inputValue,
     "todo-created-at": new Date(),
     "todo-priority": priority,
-    "todo-counter": count,
   };
   itemsArray.push(itemsObject);
   let changeToJson = JSON.stringify(itemsArray);
   localStorage.setItem("items", changeToJson);
+  counter++;
+  localStorage.setItem("counter", counter);
 };
 
 //add button to add the item to the list
