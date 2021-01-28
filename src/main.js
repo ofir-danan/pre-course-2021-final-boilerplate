@@ -1,11 +1,16 @@
-let counter = 0;
-localStorage.setItem("counter", counter);
-let itemsArray = [];
+let counter = Number(document.getElementById("counter").innerHTML);
+let itemsArray = []; // this array will contain the objects for the localStorage
+
+// getting the values from the localStorage
 let itemsFromLocalStorage = JSON.parse(localStorage.getItem("items"));
-console.log(itemsFromLocalStorage);
 let counterFromLocalStorage = JSON.parse(localStorage.getItem("counter"));
+
 const listSection = document.querySelector("#view-section");
+
+// this will check if the localStorage contain information and if it is it will print it
 window.addEventListener("DOMContentLoaded", function () {
+  if (counterFromLocalStorage === null) return;
+  counter = counterFromLocalStorage;
   if (itemsFromLocalStorage === null) return;
   for (let i = 0; i < itemsFromLocalStorage.length; i++) {
     itemsArray = itemsFromLocalStorage;
@@ -41,10 +46,12 @@ window.addEventListener("DOMContentLoaded", function () {
     todoPriority.classList.add("todo-priority");
     todoContainer.appendChild(todoPriority);
 
+    const counterSpan = document.getElementById("counter");
+
     todoText.innerText = itemsFromLocalStorage[i]["todo-text"];
     todoCreatedAt.innerText = itemsFromLocalStorage[i]["todo-created-at"];
     todoPriority.innerText = itemsFromLocalStorage[i]["todo-priority"];
-    // document.getElementById("todo-counter").innerText = counterFromLocalStorage;
+    counterSpan.innerText = counterFromLocalStorage;
   }
 });
 //get the value of the input and his priority
@@ -99,6 +106,11 @@ const addToList = function (inputValue, priority) {
   todoPriority.classList.add("todo-priority");
   todoContainer.appendChild(todoPriority);
 
+  //adding to the counter
+  const counterSpan = document.getElementById("counter");
+  counter++;
+  counterSpan.innerText = counter;
+
   //giving the item another class to style him by class
   if (priority === "1") {
     todoContainer.classList.add("top-priority");
@@ -126,7 +138,6 @@ const addToList = function (inputValue, priority) {
   itemsArray.push(itemsObject);
   let changeToJson = JSON.stringify(itemsArray);
   localStorage.setItem("items", changeToJson);
-  counter++;
   localStorage.setItem("counter", counter);
 };
 
@@ -150,7 +161,7 @@ sortButton.addEventListener("click", function () {
   warpingDiv
     .find(".todo-container")
     .sort(function (a, b) {
-      return +a.dataset.percentage - +b.dataset.percentage;
+      return +b.dataset.percentage - +a.dataset.percentage;
     })
     .appendTo(warpingDiv);
 });
