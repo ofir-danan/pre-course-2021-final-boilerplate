@@ -5,7 +5,7 @@ let itemsArray = []; // this array will contain the objects for the localStorage
 let BIN_ID = "6016e96d0ba5ca5799d1b648";
 let url = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 let geturl = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
-// let master_key = `$2b$10$cRzyEQSOZdt/fuOMckt6ROz.jxlLbODODX6ElNIoUyP95gTbEWOIK`;
+// let API_KEY = `$2b$10$cRzyEQSOZdt/fuOMckt6ROz.jxlLbODODX6ElNIoUyP95gTbEWOIK`;
 
 async function putData() {
   const sendObject = {
@@ -209,8 +209,10 @@ window.addEventListener("DOMContentLoaded", async function () {
     if (dataFromJSONBin["counter"] === undefined) return;
     let itemsFromJSONBin = dataFromJSONBin["my-todo"];
     counter = dataFromJSONBin["counter"];
+    itemsArray = itemsFromJSONBin;
+    const counterSpan = document.getElementById("counter");
+    counterSpan.innerText = dataFromJSONBin["counter"];
     for (let i = 0; i < itemsFromJSONBin.length; i++) {
-      itemsArray = itemsFromJSONBin;
       //add the container div
       const todoContainer = document.createElement("div");
       todoContainer.classList.add("todo-container");
@@ -243,12 +245,9 @@ window.addEventListener("DOMContentLoaded", async function () {
       todoPriority.classList.add("todo-priority");
       todoContainer.appendChild(todoPriority);
 
-      const counterSpan = document.getElementById("counter");
-
       todoText.innerText = itemsFromJSONBin[i]["todo-text"];
       todoCreatedAt.innerText = itemsFromJSONBin[i]["todo-created-at"];
       todoPriority.innerText = itemsFromJSONBin[i]["todo-priority"];
-      counterSpan.innerText = dataFromJSONBin["counter"];
     }
   });
 });
