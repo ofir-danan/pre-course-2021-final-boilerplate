@@ -2,9 +2,10 @@
 // const { Request, default: fetch } = require("node-fetch");
 let counter = Number(document.getElementById("counter").innerHTML);
 let itemsArray = []; // this array will contain the objects for the localStorage
-let BIN_ID = "6016d6030ba5ca5799d1ad5c";
+let BIN_ID = "6016e96d0ba5ca5799d1b648";
 let url = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 let geturl = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+// let master_key = `$2b$10$cRzyEQSOZdt/fuOMckt6ROz.jxlLbODODX6ElNIoUyP95gTbEWOIK`;
 
 async function putData() {
   const sendObject = {
@@ -31,18 +32,7 @@ async function getData() {
   const request = new Request(geturl, init);
   const response = await fetch(request);
   const body = await response.json();
-  console.log(body);
-  return body.record["my-todo"];
-}
-
-async function getCounter() {
-  let init = {
-    method: "GET",
-  };
-  const request = new Request(geturl, init);
-  const response = await fetch(request);
-  const body = await response.json();
-  return body.record.counter;
+  return body.record;
 }
 
 const listSection = document.querySelector("#view-section");
@@ -68,7 +58,7 @@ const addCheckBox = function (todoContainer) {
 };
 
 // TODO TEXT DIV
-const addTextDiv = async function (todoContainer) {
+const addTextDiv = function (todoContainer) {
   let inputValue = document.getElementById("text-input").value;
   let todoText = document.createElement("div");
   todoText.innerText = inputValue;
@@ -76,21 +66,21 @@ const addTextDiv = async function (todoContainer) {
   todoContainer.appendChild(todoText);
   document.getElementById("text-input").value = "";
   document.getElementById("text-input").focus();
-  await addDateDiv(todoContainer, inputValue);
+  addDateDiv(todoContainer, inputValue);
 };
 
 //TODO DATE DIV
-const addDateDiv = async function (todoContainer, inputValue) {
+const addDateDiv = function (todoContainer, inputValue) {
   let todoCreatedAt = document.createElement("div");
   let newDate = getDate();
   todoCreatedAt.innerText = newDate;
   todoCreatedAt.classList.add("todo-created-at");
   todoContainer.appendChild(todoCreatedAt);
-  await addPriority(todoContainer, inputValue, newDate);
+  addPriority(todoContainer, inputValue, newDate);
 };
 
 //TODO PRIORITY DIV
-const addPriority = async function (todoContainer, inputValue, newDate) {
+const addPriority = function (todoContainer, inputValue, newDate) {
   let priority = document.getElementById("priority-selector").value;
   let todoPriority = document.createElement("div");
   todoPriority.innerText = priority;
@@ -106,18 +96,18 @@ const addPriority = async function (todoContainer, inputValue, newDate) {
   todoContainer.setAttribute("data-percentage", priority);
 
   //calling a function that will put all the input details in the localStorage
-  await addToStorage(inputValue, newDate, priority, counter);
+  addToStorage(inputValue, newDate, priority, counter);
 };
 
 // ADD TO LOCALSTORAGE FUNCTION
-const addToStorage = async function (inputValue, newDate, priority, counter) {
+const addToStorage = function (inputValue, newDate, priority, counter) {
   let itemsObject = {
     "todo-text": inputValue,
     "todo-created-at": newDate,
     "todo-priority": priority,
   };
   itemsArray.push(itemsObject);
-  await putData(itemsArray, counter);
+  putData(itemsArray, counter);
 };
 
 // DATE FUNCTION
@@ -158,12 +148,11 @@ deleteButton.addEventListener("click", function () {
         //if confirmed continue
         let parent = $(".taskCheck:checked").closest(".todo-container");
 
-        // let newCounterFromJSONBin = await getCounter();
         //taking all the innerText of the div that was selected in order
         //to find the wanted item in the storage
         for (let i = 0; i < parent.length; i++) {
           let newItemsFromJSONBin = await getData();
-          //   // getting the values from the localStorage
+          // getting the values from the localStorage
           let divInnerText = parent[i].innerText;
           //modify the date to look the same
           let arrayDiv = divInnerText.split("\n");
@@ -182,7 +171,6 @@ deleteButton.addEventListener("click", function () {
           }
 
           //putting the items that use not deleted in the storage
-          //   let newItemsJSON = JSON.stringify(newItems);
 
           //change the counter
           document.getElementById("counter").innerText = newItems.length;
@@ -216,52 +204,51 @@ input.addEventListener("keyup", function (event) {
 
 // this will check if the localStorage contain information and if it is it will print it
 window.addEventListener("DOMContentLoaded", async function () {
-  let itemsFromJSONBin = await getData();
-  let counterFromJSONBin = await getCounter();
-  if (counterFromJSONBin === null) return;
-  counter = counterFromJSONBin;
-  // console.log("4444." + itemsFromJSONBin.length);
-  if (itemsFromJSONBin === null) return;
-  for (let i = 0; i < itemsFromJSONBin.length; i++) {
-    console.log("5555" + itemsFromJSONBin);
-    itemsArray = itemsFromJSONBin;
-    //add the container div
-    const todoContainer = document.createElement("div");
-    todoContainer.classList.add("todo-container");
-    listSection.appendChild(todoContainer);
+  getData().then((result) => {
+    let dataFromJSONBin = result;
+    if (dataFromJSONBin["counter"] === undefined) return;
+    let itemsFromJSONBin = dataFromJSONBin["my-todo"];
+    counter = dataFromJSONBin["counter"];
+    for (let i = 0; i < itemsFromJSONBin.length; i++) {
+      itemsArray = itemsFromJSONBin;
+      //add the container div
+      const todoContainer = document.createElement("div");
+      todoContainer.classList.add("todo-container");
+      listSection.appendChild(todoContainer);
 
-    // adding data-percentage and class to sort them later by priority
-    todoContainer.setAttribute(
-      "data-percentage",
-      itemsFromJSONBin[i]["todo-priority"]
-    );
+      // adding data-percentage and class to sort them later by priority
+      todoContainer.setAttribute(
+        "data-percentage",
+        itemsFromJSONBin[i]["todo-priority"]
+      );
 
-    // adding a check box
-    const taskCheck = document.createElement("input");
-    taskCheck.setAttribute("type", "checkbox");
-    taskCheck.className = "taskCheck";
-    todoContainer.appendChild(taskCheck);
+      // adding a check box
+      const taskCheck = document.createElement("input");
+      taskCheck.setAttribute("type", "checkbox");
+      taskCheck.className = "taskCheck";
+      todoContainer.appendChild(taskCheck);
 
-    // adding the text
-    const todoText = document.createElement("div");
-    todoText.classList.add("todo-text");
-    todoContainer.appendChild(todoText);
+      // adding the text
+      const todoText = document.createElement("div");
+      todoText.classList.add("todo-text");
+      todoContainer.appendChild(todoText);
 
-    // adding the time
-    const todoCreatedAt = document.createElement("div");
-    todoCreatedAt.classList.add("todo-created-at");
-    todoContainer.appendChild(todoCreatedAt);
+      // adding the time
+      const todoCreatedAt = document.createElement("div");
+      todoCreatedAt.classList.add("todo-created-at");
+      todoContainer.appendChild(todoCreatedAt);
 
-    // adding the priority
-    const todoPriority = document.createElement("div");
-    todoPriority.classList.add("todo-priority");
-    todoContainer.appendChild(todoPriority);
+      // adding the priority
+      const todoPriority = document.createElement("div");
+      todoPriority.classList.add("todo-priority");
+      todoContainer.appendChild(todoPriority);
 
-    const counterSpan = document.getElementById("counter");
+      const counterSpan = document.getElementById("counter");
 
-    todoText.innerText = itemsFromJSONBin[i]["todo-text"];
-    todoCreatedAt.innerText = itemsFromJSONBin[i]["todo-created-at"];
-    todoPriority.innerText = itemsFromJSONBin[i]["todo-priority"];
-    counterSpan.innerText = counterFromJSONBin;
-  }
+      todoText.innerText = itemsFromJSONBin[i]["todo-text"];
+      todoCreatedAt.innerText = itemsFromJSONBin[i]["todo-created-at"];
+      todoPriority.innerText = itemsFromJSONBin[i]["todo-priority"];
+      counterSpan.innerText = dataFromJSONBin["counter"];
+    }
+  });
 });
