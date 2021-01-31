@@ -70,9 +70,9 @@ const addToList = function (inputValue, priority) {
     const time = new Date();
     const date = `${
       time.getDate() > 10 ? time.getDate() : `0${time.getDate()}`
-    }-
-    ${time.getMonth() > 10 ? time.getMonth() : `0${time.getMonth() + 1}`}
-    -${time.getFullYear()}   ${time.getHours()}:${
+    }-${
+      time.getMonth() > 10 ? time.getMonth() : `0${time.getMonth() + 1}`
+    }-${time.getFullYear()}   ${time.getHours()}:${
       time.getMinutes() > 10 ? time.getMinutes() : `0${time.getMinutes()}`
     }:${time.getSeconds() > 10 ? time.getSeconds() : `0${time.getSeconds()}`}`;
     return date;
@@ -112,13 +112,13 @@ const addToList = function (inputValue, priority) {
   counterSpan.innerText = counter;
 
   //giving the item another class to style him by class
-  if (priority === "1") {
+  if (priority === "5") {
     todoContainer.classList.add("top-priority");
-  } else if (priority === "2") {
+  } else if (priority === "4") {
     todoContainer.classList.add("second-priority");
   } else if (priority === "3") {
     todoContainer.classList.add("third-priority");
-  } else if (priority === "4") {
+  } else if (priority === "2") {
     todoContainer.classList.add("fourth-priority");
   } else {
     todoContainer.classList.add("fifth-priority");

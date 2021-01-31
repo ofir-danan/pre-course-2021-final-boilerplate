@@ -2,19 +2,61 @@ body {
   font-family: "Raleway", sans-serif;
   padding-left: 15%;
   padding-right: 15%;
+  background-image: url(blackboard.jpg);
+  color: white;
+}
+#control-section {
+  font-style: italic;
 }
 
+#view-section {
+  min-height: 200px;
+}
+
+#todo-index {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 10px;
+}
+#todo-index > div {
+  height: auto;
+  min-width: 200px;
+  max-width: 300px;
+  margin: 5px;
+  text-align: center;
+  vertical-align: bottom;
+  font-weight: bold;
+  text-decoration: underline double;
+}
 .todo-container {
   display: flex;
   justify-content: space-between;
   position: relative;
   margin: 10px;
 }
+.todo-container:hover {
+  background-color: rgba(255, 255, 255, 0.068);
+  font-weight: bold;
+}
 .todo-container > div {
   height: auto;
   min-width: 200px;
   max-width: 300px;
   margin: 5px;
+  text-align: center;
+  vertical-align: bottom;
+}
+
+.todo-priority {
+  width: 50px !important;
+}
+.todo-created-at {
+  white-space: nowrap;
+  height: auto;
+  min-width: 200px;
+  max-width: 400px;
+  display: inline-block;
 }
 
 #control-section {
@@ -27,47 +69,26 @@ body {
   left: -20px;
 }
 
-.top-priority {
-  background-color: rgb(108, 253, 120);
-}
-
-.second-priority {
-  background-color: rgb(137, 252, 147);
-}
-
-.third-priority {
-  background-color: rgb(169, 250, 176);
-}
-
-.fourth-priority {
-  background-color: rgb(196, 255, 201);
-}
-
-.fifth-priority {
-  background-color: rgb(220, 255, 223);
-}
-
 #delete-section {
   text-align: center;
 }
 
 button {
-  box-shadow: 0px 10px 14px -7px #277334;
-  background: linear-gradient(to bottom, #59b365 5%, #40995b 100%);
-  background-color: #59b36f;
-  border-radius: 8px;
+  background-color: unset;
+  font-family: "Raleway", sans-serif;
+  border: none;
   display: inline-block;
   cursor: pointer;
   color: #ffffff;
-  font-weight: bold;
   padding: 13px 32px;
   text-decoration: none;
-  text-shadow: 0px 1px 0px #3d8a4e;
   margin: 3px;
 }
 button:hover {
-  background: linear-gradient(to bottom, #40994f 5%, #59b365 100%);
-  background-color: #409956;
+  border: rgb(128, 128, 128);
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bolder;
 }
 
 #text-input {
@@ -78,11 +99,12 @@ button:hover {
   padding: 7px 0;
   background: transparent;
   transition: border-color 0.2s;
+  color: white;
 }
 
 p {
   font-size: small;
-  color: rgb(131, 131, 131);
+  color: rgba(255, 255, 255, 0.836);
 }
 
 p:hover {
