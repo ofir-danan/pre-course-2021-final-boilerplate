@@ -12,7 +12,6 @@ body {
 #view-section {
   min-height: 200px;
 }
-
 #todo-index {
   display: flex;
   justify-content: space-between;
@@ -27,7 +26,6 @@ body {
   text-align: center;
   vertical-align: bottom;
   font-weight: bold;
-  text-decoration: underline double;
 }
 .todo-container {
   display: flex;

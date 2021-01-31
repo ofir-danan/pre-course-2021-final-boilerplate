@@ -1,20 +1,62 @@
+"use-strict";
+// const { Request, default: fetch } = require("node-fetch");
 let counter = Number(document.getElementById("counter").innerHTML);
 let itemsArray = []; // this array will contain the objects for the localStorage
+let BIN_ID = "6016d6030ba5ca5799d1ad5c";
+let url = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+let geturl = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
 
-// getting the values from the localStorage
-let itemsFromLocalStorage = JSON.parse(localStorage.getItem("items"));
-let counterFromLocalStorage = JSON.parse(localStorage.getItem("counter"));
+async function putData() {
+  const sendObject = {
+    "my-todo": itemsArray,
+    counter: counter,
+  };
+
+  let init = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(sendObject),
+  };
+  const request = new Request(url, init);
+  const response = await fetch(request);
+  return response.json();
+}
+
+async function getData() {
+  let init = {
+    method: "GET",
+  };
+  const request = new Request(geturl, init);
+  const response = await fetch(request);
+  const body = await response.json();
+  console.log(body);
+  return body.record["my-todo"];
+}
+
+async function getCounter() {
+  let init = {
+    method: "GET",
+  };
+  const request = new Request(geturl, init);
+  const response = await fetch(request);
+  const body = await response.json();
+  return body.record.counter;
+}
 
 const listSection = document.querySelector("#view-section");
-console.log(document.getElementsByTagName("body"));
 
 // TODO CONTAINER
 const addContainerDiv = function () {
-  let todoContainer = document.createElement("div");
-  todoContainer.classList.add("todo-container");
-  listSection.appendChild(todoContainer);
-  addTextDiv(todoContainer);
-  addCheckBox(todoContainer);
+  let inputValue = document.getElementById("text-input").value;
+  if (inputValue !== "") {
+    let todoContainer = document.createElement("div");
+    todoContainer.classList.add("todo-container");
+    listSection.appendChild(todoContainer);
+    addTextDiv(todoContainer);
+    addCheckBox(todoContainer);
+  }
 };
 
 // ADDING CHECK-BOX
@@ -28,7 +70,6 @@ const addCheckBox = function (todoContainer) {
 // TODO TEXT DIV
 const addTextDiv = async function (todoContainer) {
   let inputValue = document.getElementById("text-input").value;
-  inputValue.required = true;
   let todoText = document.createElement("div");
   todoText.innerText = inputValue;
   todoText.classList.add("todo-text");
@@ -65,20 +106,18 @@ const addPriority = async function (todoContainer, inputValue, newDate) {
   todoContainer.setAttribute("data-percentage", priority);
 
   //calling a function that will put all the input details in the localStorage
-  await addToLocalStorage(inputValue, newDate, priority, counter);
+  await addToStorage(inputValue, newDate, priority, counter);
 };
 
 // ADD TO LOCALSTORAGE FUNCTION
-const addToLocalStorage = function (inputValue, newDate, priority, counter) {
+const addToStorage = async function (inputValue, newDate, priority, counter) {
   let itemsObject = {
     "todo-text": inputValue,
     "todo-created-at": newDate,
     "todo-priority": priority,
   };
   itemsArray.push(itemsObject);
-  let changeToJson = JSON.stringify(itemsArray);
-  localStorage.setItem("items", changeToJson);
-  localStorage.setItem("counter", counter);
+  await putData(itemsArray, counter);
 };
 
 // DATE FUNCTION
@@ -109,7 +148,7 @@ const deleteButton = document.getElementById("delete-button");
 deleteButton.addEventListener("click", function () {
   let flag = false; //will change once the confirmation will be approved
   let confirmation = false;
-  $(".taskCheck").each(function () {
+  $(".taskCheck").each(async function () {
     if ($(this).is(":checked")) {
       if (!flag) {
         confirmation = confirm("Are you sure you want to delete this items?");
@@ -119,14 +158,17 @@ deleteButton.addEventListener("click", function () {
         //if confirmed continue
         let parent = $(".taskCheck:checked").closest(".todo-container");
 
+        // let newCounterFromJSONBin = await getCounter();
         //taking all the innerText of the div that was selected in order
         //to find the wanted item in the storage
         for (let i = 0; i < parent.length; i++) {
+          let newItemsFromJSONBin = await getData();
+          //   // getting the values from the localStorage
           let divInnerText = parent[i].innerText;
           //modify the date to look the same
           let arrayDiv = divInnerText.split("\n");
           let declarationDate = arrayDiv[1].split(" ").join("");
-          let localStorageIndex = JSON.parse(localStorage.getItem("items"));
+          let localStorageIndex = newItemsFromJSONBin;
           let newItems = []; //new array that contains all the un-deleted items
           for (let i = 0; i < localStorageIndex.length; i++) {
             let localValues = Object.values(localStorageIndex[i]);
@@ -140,12 +182,13 @@ deleteButton.addEventListener("click", function () {
           }
 
           //putting the items that use not deleted in the storage
-          let newItemsJSON = JSON.stringify(newItems);
+          //   let newItemsJSON = JSON.stringify(newItems);
 
           //change the counter
           document.getElementById("counter").innerText = newItems.length;
-          localStorage.setItem("counter", newItems.length);
-          localStorage.setItem("items", newItemsJSON);
+          itemsArray = newItems;
+          counter = newItems.length;
+          await putData(itemsArray, counter);
         }
         //removing from the page without reload
         $(".taskCheck:checked").closest(".todo-container").remove();
@@ -172,12 +215,16 @@ input.addEventListener("keyup", function (event) {
 });
 
 // this will check if the localStorage contain information and if it is it will print it
-window.addEventListener("DOMContentLoaded", function () {
-  if (counterFromLocalStorage === null) return;
-  counter = counterFromLocalStorage;
-  if (itemsFromLocalStorage === null) return;
-  for (let i = 0; i < itemsFromLocalStorage.length; i++) {
-    itemsArray = itemsFromLocalStorage;
+window.addEventListener("DOMContentLoaded", async function () {
+  let itemsFromJSONBin = await getData();
+  let counterFromJSONBin = await getCounter();
+  if (counterFromJSONBin === null) return;
+  counter = counterFromJSONBin;
+  // console.log("4444." + itemsFromJSONBin.length);
+  if (itemsFromJSONBin === null) return;
+  for (let i = 0; i < itemsFromJSONBin.length; i++) {
+    console.log("5555" + itemsFromJSONBin);
+    itemsArray = itemsFromJSONBin;
     //add the container div
     const todoContainer = document.createElement("div");
     todoContainer.classList.add("todo-container");
@@ -186,7 +233,7 @@ window.addEventListener("DOMContentLoaded", function () {
     // adding data-percentage and class to sort them later by priority
     todoContainer.setAttribute(
       "data-percentage",
-      itemsFromLocalStorage[i]["todo-priority"]
+      itemsFromJSONBin[i]["todo-priority"]
     );
 
     // adding a check box
@@ -212,9 +259,9 @@ window.addEventListener("DOMContentLoaded", function () {
 
     const counterSpan = document.getElementById("counter");
 
-    todoText.innerText = itemsFromLocalStorage[i]["todo-text"];
-    todoCreatedAt.innerText = itemsFromLocalStorage[i]["todo-created-at"];
-    todoPriority.innerText = itemsFromLocalStorage[i]["todo-priority"];
-    counterSpan.innerText = counterFromLocalStorage;
+    todoText.innerText = itemsFromJSONBin[i]["todo-text"];
+    todoCreatedAt.innerText = itemsFromJSONBin[i]["todo-created-at"];
+    todoPriority.innerText = itemsFromJSONBin[i]["todo-priority"];
+    counterSpan.innerText = counterFromJSONBin;
   }
 });
