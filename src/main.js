@@ -328,6 +328,8 @@ function showSpinner() {
   }, 1500);
 }
 
+// DONE TASK JSON BIN AND FUNCTIONS
+
 let DONE_ID = "6017d7cfabdf9c556795e64a";
 let DONE_URL = `https://api.jsonbin.io/v3/b/${DONE_ID}`;
 let doneArray = [];
