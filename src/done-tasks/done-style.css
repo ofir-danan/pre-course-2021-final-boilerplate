@@ -4,6 +4,7 @@ body {
   padding-right: 15%;
   background-image: url(../images/blackboard.jpg);
   color: white;
+  zoom: 90%;
 }
 #control-section {
   font-style: italic;
