@@ -16,7 +16,7 @@
   <body>
     <div id="body-div">
       <section id="control-section">
-        <h1>TO-DO List</h1>
+        <img src="./images/todo-logo.png" alt="a logo of my to-do list" />
         <h3>Task Amount : <span id="counter">0</span></h3>
         <input
           type="text"
@@ -37,6 +37,10 @@
         <button id="add-button">Add</button>
         <button id="sort-button">Sort</button>
       </section>
+      <div class="sidenav">
+        <a href="index.html" id="main-bar">Need To Do</a>
+        <a href="done-tasks/done-index.html" id="recipe-bar">Done</a>
+      </div>
       <section id="view-section">
         <div>
           <div id="todo-index">
@@ -50,6 +54,7 @@
       <div id="loader"></div>
       <div id="delete-section">
         <button id="delete-button">Delete</button>
+        <button id="done-button">Done</button>
       </div>
     </div>
     <script src="./main.js"></script>

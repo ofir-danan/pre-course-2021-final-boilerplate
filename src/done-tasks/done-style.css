@@ -2,7 +2,7 @@ body {
   font-family: "Raleway", sans-serif;
   padding-left: 15%;
   padding-right: 15%;
-  background-image: url(./images/blackboard.jpg);
+  background-image: url(../images/blackboard.jpg);
   color: white;
 }
 #control-section {
@@ -171,4 +171,9 @@ option {
 
 .sidenav a:hover {
   color: #f1f1f1;
+}
+
+#done-img {
+  height: auto;
+  width: 100px;
 }

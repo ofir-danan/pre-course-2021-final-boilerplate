@@ -20,15 +20,12 @@ async function setToBin(data) {
 }
 
 async function getFromBin() {
-  const response = await fetch(
-    `https://api.jsonbin.io/v3/b/60173b4d1380f27b1c204fe0/latest`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const response = await fetch(GET_URL, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
   let binArray = await response.json();
   console.log(binArray.record);
   return binArray.record["my-todo"];
@@ -211,7 +208,7 @@ input.addEventListener("keyup", function (event) {
   }
 });
 
-// this will check if the localStorage contain information and if it is it will print it
+// ON LOAD FUNCTION
 window.addEventListener("DOMContentLoaded", async (e) => {
   showSpinner();
   try {
@@ -222,6 +219,7 @@ window.addEventListener("DOMContentLoaded", async (e) => {
   }
 });
 
+//LOAD FROM JSONbin function
 let JSONbinLoad = async function () {
   let fetchData = await getFromBin();
   console.log(fetchData);
@@ -269,6 +267,8 @@ let JSONbinLoad = async function () {
   }
 };
 
+// LOCALSTORAGE function that load the saved data from the localStorage in case there
+//is a something wrong
 let localStorageLoad = function () {
   if (counterFromLocalStorage === null) return;
   counter = counterFromLocalStorage;
@@ -317,7 +317,7 @@ let localStorageLoad = function () {
 };
 
 let loader = document.getElementById("loader");
-//the spinner load func
+//THE SPINNER ON LOAD FUNCTION
 function showSpinner() {
   loader.style.visibility = "visible";
   setTimeout(() => {
@@ -327,3 +327,79 @@ function showSpinner() {
     );
   }, 1500);
 }
+
+let DONE_ID = "6017d7cfabdf9c556795e64a";
+let DONE_URL = `https://api.jsonbin.io/v3/b/${DONE_ID}`;
+let doneArray = [];
+//JSONbin functions
+async function setToDone(data) {
+  const sendObject = {
+    "my-todo": data,
+  };
+  const response = await fetch(DONE_URL, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(sendObject),
+  });
+  return response.json();
+}
+
+// TASK DONE BUTTON
+const doneButton = document.getElementById("done-button");
+doneButton.addEventListener("click", function () {
+  let flag = false; //will change once the confirmation will be approved
+  let confirmation = false;
+  $(".taskCheck").each(function () {
+    if ($(this).is(":checked")) {
+      if (!flag) {
+        confirmation = confirm("Did you completed this tasks?");
+        flag = true;
+      }
+      if (confirmation === true) {
+        //if confirmed continue
+        let parent = $(".taskCheck:checked").closest(".todo-container");
+
+        //taking all the innerText of the div that was selected in order
+        //to find the wanted item in the storage
+        for (let i = 0; i < parent.length; i++) {
+          let divInnerText = parent[i].innerText;
+          //modify the date to look the same
+          let arrayDiv = divInnerText.split("\n");
+          let declarationDate = arrayDiv[1].split(" ").join("");
+          let localStorageIndex = JSON.parse(localStorage.getItem("items"));
+          let newItems = []; //new array that contains all the un-deleted items
+          for (let i = 0; i < localStorageIndex.length; i++) {
+            let localValues = Object.values(localStorageIndex[i]);
+            //modify the date to look the same
+            let declarationDateStorage = localValues[1].split(" ").join("");
+
+            //comparing the strings of the date in order to find the parallel item
+            if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
+              newItems.push(localStorageIndex[i]);
+            } else {
+              doneArray.push(localStorageIndex[i]);
+              parent[i].style.textDecoration = "line-through";
+            }
+          }
+          itemsArray = newItems;
+          console.log(doneArray);
+          //putting the items that use not deleted in the storage
+          let newItemsJSON = JSON.stringify(newItems);
+
+          //change the counter
+          document.getElementById("counter").innerText = newItems.length;
+          localStorage.setItem("counter", newItems.length);
+          localStorage.setItem("items", newItemsJSON);
+        }
+      }
+      setToBin(itemsArray);
+      setToDone(doneArray);
+    }
+    return;
+  });
+  if (!confirmation) {
+    alert("please select items to mark as Done");
+  }
+});

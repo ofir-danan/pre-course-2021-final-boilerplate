@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My TODO List</title>
+    <link rel="stylesheet" href="./done-style.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div id="body-div">
+      <section id="control-section">
+        <img src="../images/todo-logo.png" alt="a logo of my to-do list" />
+        <img src="../images/done-logo.png" alt="done v" id="done-img" />
+        <h3>Here You Can See All The Tasks You Have Completed</h3>
+        <h5>
+          If You Want To Remove Task Permanently, Check The Task And Push Delete
+        </h5>
+      </section>
+      <div class="sidenav">
+        <a href="../index.html" id="main-bar">Need To Do</a>
+        <a href="done-index.html" id="recipe-bar">Done</a>
+      </div>
+      <section id="view-section">
+        <div>
+          <div id="todo-index">
+            <div>The Task</div>
+            <div>When Task Was Created</div>
+            <div>Task Priority</div>
+          </div>
+          <hr />
+        </div>
+      </section>
+      <div id="delete-section">
+        <button id="delete-button">Delete</button>
+      </div>
+    </div>
+    <script src="./done-script.js"></script>
+  </body>
+</html>
