@@ -1,23 +1,38 @@
-# ![Scale-Up Velocity](./readme-files/logo-main.png) Pre Course Project - Todo List 📋
+# ![Scale-Up Velocity](./src/images/todo-logo.png) Pre Course Project - Todo List 📋
 
-This project will include most of the topics we have learnt so far.
-This repository includes a basic skeleton template with automated tests, use it for your submissions.
+## Introduction
 
-In this project you will create a Todo List Web Application, in which the user can store prioritized _todo tasks_ and view/sort that list.
+In this website you can manage your tasks in much simpler way!
+All you need to do is insert task, pick the priority of the task, and click ENTER key or on the add button!
 
-Here is a preview sample of the desired functionality (without styling):
+## Manage Your Way Threw The Site
 
-![Add todo task](./readme-files/basic-todo.gif)
+### Sort Button
 
-## Instructions
+The items will be added be the order of creation, but if you like to sort by priority all you need to do is click on the sort button.
 
-- Fork this repository into your account. Make sure to select the **public** option ⑂
-- Clone your new repository to your computer 🖥
-- Install the project dependencies by running `npm install` from the vscode terminal `ctrl + j` (make sure you are in the correct directory) 📂
-<!-- - [Create new branch](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/managing-branches) -->
-- Make changes to the code to meet the project requirements 📝
-- [Commit Early, Push Often](https://www.worklytics.co/commit-early-push-often/) - your work will be evaluated by your push history 📖
-- Good Luck! 🤘
+![sort button](./readme-files/gifs/sort.gif)
+
+### Done Button
+
+After finishing a task, you can mark the task and click the "Done" button.
+The task will go to the "Done" section and you could check your done tasks there.
+
+![done button](./readme-files/gifs/done-item.gif)
+
+### Done section
+
+In the "Done" section you can see the tasks you finished and delete them if you wish.
+The logo on the top off the page will be different and the "Done" section on the Nav-Bar will be bold so you could tell the difference.
+
+![done section](./readme-files/gifs/done-sec.gif)
+
+### Delete button
+
+In the main page, you can check items you wish to delete, and after clicking the "Delete" button the will be gone forever.
+Its recommended to use the delete button only on tasks you added unintentionally.
+
+![delete button](./readme-files/gifs/delete-button.gif)
 
 ## Running tests
 

@@ -9,6 +9,10 @@ body {
   font-style: italic;
 }
 
+#need-to-do {
+  color: white;
+}
+
 #view-section {
   min-height: 100px;
 }
