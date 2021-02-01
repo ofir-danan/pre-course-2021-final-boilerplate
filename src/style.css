@@ -10,7 +10,7 @@ body {
 }
 
 #view-section {
-  min-height: 200px;
+  min-height: 100px;
 }
 #todo-index {
   display: flex;
@@ -107,4 +107,35 @@ p {
 
 p:hover {
   font-weight: bold;
+}
+
+#loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+  position: relative;
+  left: 40%;
+  top: 30%;
+}
+
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

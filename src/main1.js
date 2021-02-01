@@ -1,84 +1,87 @@
-"use-strict";
 let counter = Number(document.getElementById("counter").innerHTML);
 let itemsArray = []; // this array will contain the objects for the localStorage
-let BIN_ID = "6016e96d0ba5ca5799d1b648";
-let url = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-let geturl = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+let BIN_ID = "60173b4d1380f27b1c204fe0";
+let PUT_URL = `https://api.jsonbin.io/b/60173b4d1380f27b1c204fe0`;
+let GET_URL = `https://api.jsonbin.io/b/60173b4d1380f27b1c204fe0/latest`;
 
-async function putData() {
+async function setPersistent(data) {
   const sendObject = {
-    "my-todo": itemsArray,
-    // counter: counter,
+    "my-todo": data,
   };
-  const response = await fetch(url, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(sendObject),
-  });
+  const response = await fetch(
+    "https://api.jsonbin.io/b/60173b4d1380f27b1c204fe0",
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(sendObject),
+    }
+  );
   return response.json();
 }
 
-async function getData() {
-  const response = await fetch(geturl, {
-    method: "GET",
-  });
+async function getPersistent() {
+  const response = await fetch(
+    `https://api.jsonbin.io/b/60173b4d1380f27b1c204fe0/latest`,
+    {
+      method: "GET",
+    }
+  );
   const body = await response.json();
-  return body.record["my-todo"];
+  return body.record;
 }
 
 // this will check if the localStorage contain information and if it is it will print it
-window.addEventListener("DOMContentLoaded", function () {
-  getData().then((result) => {
-    console.log(result);
-    let dataFromJSONBin = result;
-    if (dataFromJSONBin.length === 0) return;
-    // let dataFromJSONBin["my-todo"] = dataFromJSONBin["my-todo"];
-    counter = dataFromJSONBin.length;
-    itemsArray = dataFromJSONBin;
-    const counterSpan = document.getElementById("counter");
-    counterSpan.innerText = dataFromJSONBin.length;
-    const listSection = document.querySelector("#view-section");
-    for (let i = 0; i < dataFromJSONBin.length; i++) {
-      console.log(dataFromJSONBin[i]["todo-text"]);
-      //add the container div
-      const todoContainer = document.createElement("div");
-      todoContainer.classList.add("todo-container");
-      listSection.appendChild(todoContainer);
+window.addEventListener("DOMContentLoaded", async function () {
+  let fetchData = await getPersistent();
+  console.log(fetchData);
+  let dataFromJSONBin = result["my-todo"];
+  if (dataFromJSONBin.length === 0) return;
+  // let dataFromJSONBin["my-todo"] = dataFromJSONBin["my-todo"];
+  counter = dataFromJSONBin.length;
+  itemsArray = dataFromJSONBin;
+  const counterSpan = document.getElementById("counter");
+  counterSpan.innerText = dataFromJSONBin.length;
+  const listSection = document.querySelector("#view-section");
+  for (let i = 0; i < dataFromJSONBin.length; i++) {
+    console.log(dataFromJSONBin[i]["todo-text"]);
+    //add the container div
+    const todoContainer = document.createElement("div");
+    todoContainer.classList.add("todo-container");
+    listSection.appendChild(todoContainer);
 
-      // adding data-percentage and class to sort them later by priority
-      todoContainer.setAttribute(
-        "data-percentage",
-        dataFromJSONBin[i]["todo-priority"]
-      );
+    // adding data-percentage and class to sort them later by priority
+    todoContainer.setAttribute(
+      "data-percentage",
+      dataFromJSONBin[i]["todo-priority"]
+    );
 
-      // adding a check box
-      const taskCheck = document.createElement("input");
-      taskCheck.setAttribute("type", "checkbox");
-      taskCheck.className = "taskCheck";
-      todoContainer.appendChild(taskCheck);
+    // adding a check box
+    const taskCheck = document.createElement("input");
+    taskCheck.setAttribute("type", "checkbox");
+    taskCheck.className = "taskCheck";
+    todoContainer.appendChild(taskCheck);
 
-      // adding the text
-      const todoText = document.createElement("div");
-      todoText.classList.add("todo-text");
-      todoContainer.appendChild(todoText);
+    // adding the text
+    const todoText = document.createElement("div");
+    todoText.classList.add("todo-text");
+    todoContainer.appendChild(todoText);
 
-      // adding the time
-      const todoCreatedAt = document.createElement("div");
-      todoCreatedAt.classList.add("todo-created-at");
-      todoContainer.appendChild(todoCreatedAt);
+    // adding the time
+    const todoCreatedAt = document.createElement("div");
+    todoCreatedAt.classList.add("todo-created-at");
+    todoContainer.appendChild(todoCreatedAt);
 
-      // adding the priority
-      const todoPriority = document.createElement("div");
-      todoPriority.classList.add("todo-priority");
-      todoContainer.appendChild(todoPriority);
+    // adding the priority
+    const todoPriority = document.createElement("div");
+    todoPriority.classList.add("todo-priority");
+    todoContainer.appendChild(todoPriority);
 
-      todoText.innerText = dataFromJSONBin[i]["todo-text"];
-      todoCreatedAt.innerText = dataFromJSONBin[i]["todo-created-at"];
-      todoPriority.innerText = dataFromJSONBin[i]["todo-priority"];
-    }
-  });
+    todoText.innerText = dataFromJSONBin[i]["todo-text"];
+    todoCreatedAt.innerText = dataFromJSONBin[i]["todo-created-at"];
+    todoPriority.innerText = dataFromJSONBin[i]["todo-priority"];
+  }
 });
 
 const listSection = document.querySelector("#view-section");
@@ -146,14 +149,14 @@ const addPriority = function (todoContainer, inputValue, newDate) {
 };
 
 // ADD TO LOCALSTORAGE FUNCTION
-const addToStorage = function (inputValue, newDate, priority, counter) {
+const addToStorage = async function (inputValue, newDate, priority, counter) {
   let itemsObject = {
     "todo-text": inputValue,
     "todo-created-at": newDate,
     "todo-priority": priority,
   };
   itemsArray.push(itemsObject);
-  putData(itemsArray, counter);
+  await setPersistent(itemsArray);
 };
 
 // DATE FUNCTION
