@@ -210,7 +210,6 @@ input.addEventListener("keyup", function (event) {
 
 // ON LOAD FUNCTION
 window.addEventListener("DOMContentLoaded", async (e) => {
-  showSpinner();
   try {
     await JSONbinLoad();
   } catch (error) {
@@ -315,18 +314,6 @@ let localStorageLoad = function () {
     counterSpan.innerText = counterFromLocalStorage;
   }
 };
-
-let loader = document.getElementById("loader");
-//THE SPINNER ON LOAD FUNCTION
-function showSpinner() {
-  loader.style.visibility = "visible";
-  setTimeout(() => {
-    loader.style.visibility = loader.style.visibility.replace(
-      "visible",
-      "hidden"
-    );
-  }, 1500);
-}
 
 // DONE TASK JSON BIN AND FUNCTIONS
 
