@@ -38,7 +38,7 @@ const deleteButton = document.getElementById("delete-button");
 deleteButton.addEventListener("click", function () {
   let flag = false; //will change once the confirmation will be approved
   let confirmation = false;
-  $(".taskCheck").each(function () {
+  $(".taskCheck").each(async function () {
     if ($(this).is(":checked")) {
       if (!flag) {
         confirmation = confirm("Are you sure you want to delete this items?");
@@ -47,7 +47,7 @@ deleteButton.addEventListener("click", function () {
       if (confirmation === true) {
         //if confirmed continue
         let parent = $(".taskCheck:checked").closest(".todo-container");
-
+        let localStorageIndex = await getFromBin();
         //taking all the innerText of the div that was selected in order
         //to find the wanted item in the storage
         for (let i = 0; i < parent.length; i++) {
@@ -55,18 +55,17 @@ deleteButton.addEventListener("click", function () {
           //modify the date to look the same
           let arrayDiv = divInnerText.split("\n");
           let declarationDate = arrayDiv[1].split(" ").join("");
-          let localStorageIndex = JSON.parse(localStorage.getItem("items"));
           let newItems = []; //new array that contains all the un-deleted items
-          for (let i = 0; i < localStorageIndex.length; i++) {
-            let localValues = Object.values(localStorageIndex[i]);
-            //modify the date to look the same
-            let declarationDateStorage = localValues[1].split(" ").join("");
+          // for (let i = 0; i < localStorageIndex.length; i++) {
+          let localValues = Object.values(localStorageIndex[i]);
+          //modify the date to look the same
+          let declarationDateStorage = localValues[1].split(" ").join("");
 
-            //comparing the strings of the date in order to find the parallel item
-            if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
-              newItems.push(localStorageIndex[i]);
-            }
+          //comparing the strings of the date in order to find the parallel item
+          if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
+            newItems.push(localStorageIndex[i]);
           }
+          // }
           itemsArray = newItems;
         }
 

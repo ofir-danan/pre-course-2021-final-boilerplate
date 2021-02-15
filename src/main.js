@@ -32,9 +32,10 @@ async function getFromBin() {
 }
 
 // getting the values from the localStorage
-let itemsFromLocalStorage = JSON.parse(localStorage.getItem("items"));
-let counterFromLocalStorage = JSON.parse(localStorage.getItem("counter"));
-
+// let itemsFromLocalStorage = JSON.parse(localStorage.getItem("items"));
+// let counterFromLocalStorage = JSON.parse(localStorage.getItem("counter"));
+let itemsFromLocalStorage = getFromBin();
+let counterFromLocalStorage = itemsFromLocalStorage.length;
 const listSection = document.querySelector("#view-section");
 
 // TODO CONTAINER
@@ -94,25 +95,19 @@ const addPriority = async function (todoContainer, inputValue, newDate) {
   todoContainer.setAttribute("data-percentage", priority);
 
   //calling a function that will put all the input details in the localStorage
-  await addToLocalStorage(inputValue, newDate, priority, counter);
+  await addToLocalStorage(inputValue, newDate, priority);
 };
 
 // ADD TO LOCALSTORAGE FUNCTION
-const addToLocalStorage = async function (
-  inputValue,
-  newDate,
-  priority,
-  counter
-) {
+const addToLocalStorage = async function (inputValue, newDate, priority) {
   let itemsObject = {
     text: inputValue,
     date: newDate,
     priority: priority,
   };
   itemsArray.push(itemsObject);
-  let changeToJson = JSON.stringify(itemsArray);
-  localStorage.setItem("items", changeToJson);
-  localStorage.setItem("counter", counter);
+
+  // localStorage.setItem("counter", counter);
   await setToBin(itemsArray);
 };
 
@@ -144,7 +139,7 @@ const deleteButton = document.getElementById("delete-button");
 deleteButton.addEventListener("click", function () {
   let flag = false; //will change once the confirmation will be approved
   let confirmation = false;
-  $(".taskCheck").each(function () {
+  $(".taskCheck").each(async function () {
     if ($(this).is(":checked")) {
       if (!flag) {
         confirmation = confirm("Are you sure you want to delete this items?");
@@ -156,31 +151,37 @@ deleteButton.addEventListener("click", function () {
 
         //taking all the innerText of the div that was selected in order
         //to find the wanted item in the storage
+        let localStorageIndex = await getFromBin();
         for (let i = 0; i < parent.length; i++) {
           let divInnerText = parent[i].innerText;
           //modify the date to look the same
           let arrayDiv = divInnerText.split("\n");
           let declarationDate = arrayDiv[1].split(" ").join("");
-          let localStorageIndex = JSON.parse(localStorage.getItem("items"));
+          // let localStorageIndex = JSON.parse(localStorage.getItem("items"));
           let newItems = []; //new array that contains all the un-deleted items
-          for (let i = 0; i < localStorageIndex.length; i++) {
-            let localValues = Object.values(localStorageIndex[i]);
-            //modify the date to look the same
-            let declarationDateStorage = localValues[1].split(" ").join("");
+          // for (let i = 0; i < localStorageIndex.length; i++) {
+          let localValues = Object.values(localStorageIndex[i]);
+          // let localValues = localStorageIndex[i];
+          console.log(localValues);
+          console.log(localStorageIndex);
+          //modify the date to look the same
+          let declarationDateStorage = localValues[1].split(" ").join("");
+          console.log(declarationDateStorage);
 
-            //comparing the strings of the date in order to find the parallel item
-            if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
-              newItems.push(localStorageIndex[i]);
-            }
+          //comparing the strings of the date in order to find the parallel item
+          if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
+            newItems.push(localStorageIndex[i]);
+            console.log(itemsArray);
           }
+          // }
           itemsArray = newItems;
           //putting the items that use not deleted in the storage
-          let newItemsJSON = JSON.stringify(newItems);
+          // let newItemsJSON = JSON.stringify(newItems);
 
           //change the counter
-          document.getElementById("counter").innerText = newItems.length;
-          localStorage.setItem("counter", newItems.length);
-          localStorage.setItem("items", newItemsJSON);
+          document.getElementById("counter").innerText = itemsArray.length;
+          // localStorage.setItem("counter", newItems.length);
+          // localStorage.setItem("items", newItemsJSON);
         }
 
         //removing from the page without reload
@@ -214,15 +215,14 @@ window.addEventListener("DOMContentLoaded", async (e) => {
     await JSONbinLoad();
   } catch (error) {
     console.error(error);
-    localStorageLoad();
+    alert("opps! something went wrong... error:" + error);
+    // localStorageLoad();
   }
 });
 
 //LOAD FROM JSONbin function
 let JSONbinLoad = async function () {
-  let fetchData = await getFromBin();
-  console.log(fetchData);
-  let dataFromJSONBin = fetchData;
+  let dataFromJSONBin = await getFromBin();
   if (dataFromJSONBin.length === 0) return;
   // let dataFromJSONBin["my-todo"] = dataFromJSONBin["my-todo"];
   counter = dataFromJSONBin.length;
@@ -268,52 +268,52 @@ let JSONbinLoad = async function () {
 
 // LOCALSTORAGE function that load the saved data from the localStorage in case there
 //is a something wrong
-let localStorageLoad = function () {
-  if (counterFromLocalStorage === null) return;
-  counter = counterFromLocalStorage;
-  if (itemsFromLocalStorage === null) return;
-  itemsArray = itemsFromLocalStorage;
-  for (let i = 0; i < itemsFromLocalStorage.length; i++) {
-    //add the container div
-    const todoContainer = document.createElement("div");
-    todoContainer.classList.add("todo-container");
-    listSection.appendChild(todoContainer);
+// let localStorageLoad = function () {
+//   if (counterFromLocalStorage === null) return;
+//   counter = counterFromLocalStorage;
+//   if (itemsFromLocalStorage === null) return;
+//   itemsArray = itemsFromLocalStorage;
+//   for (let i = 0; i < itemsFromLocalStorage.length; i++) {
+//     //add the container div
+//     const todoContainer = document.createElement("div");
+//     todoContainer.classList.add("todo-container");
+//     listSection.appendChild(todoContainer);
 
-    // adding data-percentage and class to sort them later by priority
-    todoContainer.setAttribute(
-      "data-percentage",
-      itemsFromLocalStorage[i].priority
-    );
+//     // adding data-percentage and class to sort them later by priority
+//     todoContainer.setAttribute(
+//       "data-percentage",
+//       itemsFromLocalStorage[i].priority
+//     );
 
-    // adding a check box
-    const taskCheck = document.createElement("input");
-    taskCheck.setAttribute("type", "checkbox");
-    taskCheck.className = "taskCheck";
-    todoContainer.appendChild(taskCheck);
+//     // adding a check box
+//     const taskCheck = document.createElement("input");
+//     taskCheck.setAttribute("type", "checkbox");
+//     taskCheck.className = "taskCheck";
+//     todoContainer.appendChild(taskCheck);
 
-    // adding the text
-    const todoText = document.createElement("div");
-    todoText.classList.add("todo-text");
-    todoContainer.appendChild(todoText);
+//     // adding the text
+//     const todoText = document.createElement("div");
+//     todoText.classList.add("todo-text");
+//     todoContainer.appendChild(todoText);
 
-    // adding the time
-    const todoCreatedAt = document.createElement("div");
-    todoCreatedAt.classList.add("todo-created-at");
-    todoContainer.appendChild(todoCreatedAt);
+//     // adding the time
+//     const todoCreatedAt = document.createElement("div");
+//     todoCreatedAt.classList.add("todo-created-at");
+//     todoContainer.appendChild(todoCreatedAt);
 
-    // adding the priority
-    const todoPriority = document.createElement("div");
-    todoPriority.classList.add("todo-priority");
-    todoContainer.appendChild(todoPriority);
+//     // adding the priority
+//     const todoPriority = document.createElement("div");
+//     todoPriority.classList.add("todo-priority");
+//     todoContainer.appendChild(todoPriority);
 
-    const counterSpan = document.getElementById("counter");
+//     const counterSpan = document.getElementById("counter");
 
-    todoText.innerText = itemsFromLocalStorage[i].text;
-    todoCreatedAt.innerText = itemsFromLocalStorage[i].date;
-    todoPriority.innerText = itemsFromLocalStorage[i].priority;
-    counterSpan.innerText = counterFromLocalStorage;
-  }
-};
+//     todoText.innerText = itemsFromLocalStorage[i].text;
+//     todoCreatedAt.innerText = itemsFromLocalStorage[i].date;
+//     todoPriority.innerText = itemsFromLocalStorage[i].priority;
+//     counterSpan.innerText = counterFromLocalStorage;
+//   }
+// };
 
 // DONE TASK JSON BIN AND FUNCTIONS
 
@@ -337,9 +337,10 @@ async function setToDone(data) {
 
 // TASK DONE BUTTON
 const doneButton = document.getElementById("done-button");
-doneButton.addEventListener("click", function () {
+doneButton.addEventListener("click", async function () {
   let flag = false; //will change once the confirmation will be approved
   let confirmation = false;
+  let itemsFromLocalStorage = await getFromBin();
   $(".taskCheck").each(function () {
     if ($(this).is(":checked")) {
       if (!flag) {
@@ -349,38 +350,44 @@ doneButton.addEventListener("click", function () {
       if (confirmation === true) {
         //if confirmed continue
         let parent = $(".taskCheck:checked").closest(".todo-container");
-
+        console.log(typeof parent);
+        let localStorageIndex = itemsFromLocalStorage;
         //taking all the innerText of the div that was selected in order
         //to find the wanted item in the storage
-        for (let i = 0; i < parent.length; i++) {
-          let divInnerText = parent[i].innerText;
+        for (let i = 0; i <= parent.length; i++) {
+          let divInnerText = Object.values(parent[i]);
+          let parentStyle = parent[i].style;
+          console.log(parent[i]);
+          console.log(Object.values(parent[i]));
           //modify the date to look the same
-          let arrayDiv = divInnerText.split("\n");
-          let declarationDate = arrayDiv[1].split(" ").join("");
-          let localStorageIndex = JSON.parse(localStorage.getItem("items"));
+          // let arrayDiv = divInnerText.split("\n");
+          let declarationDate = divInnerText[1].split(" ").join("");
+          // let localStorageIndex = JSON.parse(localStorage.getItem("items"));
+          // console.log(localStorageIndex);
           let newItems = []; //new array that contains all the un-deleted items
-          for (let i = 0; i < localStorageIndex.length; i++) {
-            let localValues = Object.values(localStorageIndex[i]);
-            //modify the date to look the same
-            let declarationDateStorage = localValues[1].split(" ").join("");
+          let newDone = [];
+          // for (let i = 0; i < localStorageIndex.length; i++) {
+          let localValues = Object.values(localStorageIndex[i]);
+          //modify the date to look the same
+          let declarationDateStorage = localValues[1].split(" ").join("");
 
-            //comparing the strings of the date in order to find the parallel item
-            if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
-              newItems.push(localStorageIndex[i]);
-            } else {
-              doneArray.push(localStorageIndex[i]);
-              parent[i].style.textDecoration = "line-through";
-            }
+          //comparing the strings of the date in order to find the parallel item
+          if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
+            newItems.push(localStorageIndex[i]);
           }
+          newDone.push(localStorageIndex[i]);
+          console.log(localStorageIndex[i]);
+          parentStyle.textDecoration = "line-through";
+          doneArray = newDone;
           itemsArray = newItems;
           console.log(doneArray);
           //putting the items that use not deleted in the storage
-          let newItemsJSON = JSON.stringify(newItems);
+          // let newItemsJSON = JSON.stringify(newItems);
 
           //change the counter
           document.getElementById("counter").innerText = newItems.length;
-          localStorage.setItem("counter", newItems.length);
-          localStorage.setItem("items", newItemsJSON);
+          // localStorage.setItem("counter", newItems.length);
+          // localStorage.setItem("items", newItemsJSON);
         }
       }
       setToBin(itemsArray);

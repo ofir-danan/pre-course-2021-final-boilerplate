@@ -36,6 +36,7 @@ body {
   justify-content: space-between;
   position: relative;
   margin: 10px;
+  z-index: 100;
 }
 .todo-container:hover {
   background-color: rgba(255, 255, 255, 0.068);
