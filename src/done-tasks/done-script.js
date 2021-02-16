@@ -1,27 +1,14 @@
-let itemsArray = []; // this array will contain the objects for the localStorage
-let DONE_BIN_ID = "6017d7cfabdf9c556795e64a";
-let DONE_URL = `https://api.jsonbin.io/v3/b/${DONE_BIN_ID}`;
-let GET_DONE_URL = `https://api.jsonbin.io/v3/b/${DONE_BIN_ID}/latest`;
+let itemsArray = [];
+let DONE_ID = "6017d7cfabdf9c556795e64a";
+let DONE_URL = `https://api.jsonbin.io/v3/b/${DONE_ID}`;
+let GET_DONE = `https://api.jsonbin.io/v3/b/${DONE_ID}/latest`;
 
 //JSONbin functions
-
-async function getFromBin() {
-  const response = await fetch(GET_DONE_URL, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  let binArray = await response.json();
-  console.log(binArray.record);
-  return binArray.record["my-todo"];
-}
-
-async function setToDone(data) {
+async function setToBin(data, url) {
   const sendObject = {
     "my-todo": data,
   };
-  const response = await fetch(DONE_URL, {
+  const response = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -31,77 +18,58 @@ async function setToDone(data) {
   return response.json();
 }
 
-const listSection = document.querySelector("#view-section");
+function getFromBin(url) {
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      let binArray = response.json();
+      return binArray;
+    })
+    .then((binArray) => {
+      return binArray.record["my-todo"];
+    });
+}
 
-// DELETE BUTTON
-const deleteButton = document.getElementById("delete-button");
-deleteButton.addEventListener("click", function () {
-  let flag = false; //will change once the confirmation will be approved
-  let confirmation = false;
-  $(".taskCheck").each(async function () {
-    if ($(this).is(":checked")) {
-      if (!flag) {
-        confirmation = confirm("Are you sure you want to delete this items?");
-        flag = true;
-      }
-      if (confirmation === true) {
-        //if confirmed continue
-        let parent = $(".taskCheck:checked").closest(".todo-container");
-        let localStorageIndex = await getFromBin();
-        //taking all the innerText of the div that was selected in order
-        //to find the wanted item in the storage
-        for (let i = 0; i < parent.length; i++) {
-          let divInnerText = parent[i].innerText;
-          //modify the date to look the same
-          let arrayDiv = divInnerText.split("\n");
-          let declarationDate = arrayDiv[1].split(" ").join("");
-          let newItems = []; //new array that contains all the un-deleted items
-          // for (let i = 0; i < localStorageIndex.length; i++) {
-          let localValues = Object.values(localStorageIndex[i]);
-          //modify the date to look the same
-          let declarationDateStorage = localValues[1].split(" ").join("");
-
-          //comparing the strings of the date in order to find the parallel item
-          if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
-            newItems.push(localStorageIndex[i]);
-          }
-          // }
-          itemsArray = newItems;
-        }
-
-        //removing from the page without reload
-        $(".taskCheck:checked").closest(".todo-container").remove();
-      }
-      setToDone(itemsArray);
-    }
-    return;
-  });
-  if (!confirmation) {
-    alert("please select items to delete");
+function loading() {
+  let spinner = document.getElementById("loading");
+  if (spinner.style.display === "none") {
+    spinner.style.display = "block";
+  } else {
+    spinner.style.display = "none";
   }
-});
-
+}
 // ON LOAD FUNCTION
 window.addEventListener("DOMContentLoaded", async (e) => {
+  loading();
   try {
-    await JSONbinLoad();
+    getFromBin(GET_DONE).then((response) => {
+      JSONbinLoad(response);
+    });
   } catch (error) {
     console.error(error);
-    alert(error);
+    alert("opps! something went wrong... error:" + error);
   }
 });
 
 //LOAD FROM JSONbin function
-let JSONbinLoad = async function () {
-  let fetchData = await getFromBin();
-  let dataFromJSONBin = fetchData;
-  if (dataFromJSONBin.length === 0) return;
+let JSONbinLoad = function (response) {
+  let dataFromJSONBin = response;
+  if (dataFromJSONBin.length === 0) {
+    loading();
+    return;
+  }
   itemsArray = dataFromJSONBin;
   const listSection = document.querySelector("#view-section");
   for (let i = 0; i < dataFromJSONBin.length; i++) {
     //add the container div
     const todoContainer = document.createElement("div");
     todoContainer.classList.add("todo-container");
+    todoContainer.setAttribute("id", "div" + dataFromJSONBin[i].counter);
+    console.log(dataFromJSONBin[i].counter);
     listSection.appendChild(todoContainer);
 
     // adding data-percentage and class to sort them later by priority
@@ -110,7 +78,7 @@ let JSONbinLoad = async function () {
     // adding a check box
     const taskCheck = document.createElement("input");
     taskCheck.setAttribute("type", "checkbox");
-    taskCheck.className = "taskCheck";
+    taskCheck.setAttribute("id", dataFromJSONBin[i].counter);
     todoContainer.appendChild(taskCheck);
 
     // adding the text
@@ -132,4 +100,48 @@ let JSONbinLoad = async function () {
     todoCreatedAt.innerText = dataFromJSONBin[i].date;
     todoPriority.innerText = dataFromJSONBin[i].priority;
   }
+  loading();
 };
+
+// DELETE BUTTON
+const deleteButton = document.getElementById("delete-button");
+deleteButton.addEventListener("click", function () {
+  let flag = false; //will change once the confirmation will be approved
+  let confirmation = false;
+  if (!flag) {
+    confirmation = confirm("Are you sure you want to delete this items?");
+    flag = true;
+  }
+  if (confirmation) {
+    loading();
+    let newArray = [];
+    let itemCounter = 0;
+    for (let i = 0; i < itemsArray.length; i++) {
+      let checkBoxDelete = document.getElementById(itemsArray[i].counter);
+      let divDelete = document.getElementById("div" + itemsArray[i].counter);
+      console.log(divDelete);
+      if (checkBoxDelete.checked) {
+        divDelete.remove();
+      } else {
+        itemsArray[i].counter = itemCounter;
+        newArray.push(itemsArray[i]);
+        checkBoxDelete.setAttribute("id", itemCounter);
+        divDelete.setAttribute("id", "div" + itemCounter);
+        itemCounter++;
+      }
+    }
+    itemsArray = newArray;
+    try {
+      setToBin(newArray, DONE_URL).then(loading);
+    } catch (error) {
+      alert(
+        "Sorry! we couldn't save your changes... please check your network connection and try again. Error:" +
+          error
+      );
+    }
+    return;
+  }
+  if (!confirmation) {
+    alert("please select items to delete");
+  }
+});

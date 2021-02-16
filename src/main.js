@@ -1,15 +1,19 @@
 let counter = Number(document.getElementById("counter").innerHTML);
-let itemsArray = []; // this array will contain the objects for the localStorage
+let itemsArray = [];
+let doneItemsArray = [];
 let BIN_ID = "60173b4d1380f27b1c204fe0";
+let DONE_ID = "6017d7cfabdf9c556795e64a";
 let PUT_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-let GET_URL = `https://api.jsonbin.io/v3/b/60173b4d1380f27b1c204fe0/latest`;
+let GET_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+let DONE_URL = `https://api.jsonbin.io/v3/b/${DONE_ID}`;
+let GET_DONE = `https://api.jsonbin.io/v3/b/${DONE_ID}/latest`;
 
 //JSONbin functions
-async function setToBin(data) {
+async function setToBin(data, url) {
   const sendObject = {
     "my-todo": data,
   };
-  const response = await fetch(PUT_URL, {
+  const response = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -19,96 +23,152 @@ async function setToBin(data) {
   return response.json();
 }
 
-async function getFromBin() {
-  const response = await fetch(GET_URL, {
+function getFromBin(url) {
+  return fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
-  });
-  let binArray = await response.json();
-  console.log(binArray.record);
-  return binArray.record["my-todo"];
+  })
+    .then((response) => {
+      let binArray = response.json();
+      return binArray;
+    })
+    .then((binArray) => {
+      return binArray.record["my-todo"];
+    });
 }
 
-// getting the values from the localStorage
-// let itemsFromLocalStorage = JSON.parse(localStorage.getItem("items"));
-// let counterFromLocalStorage = JSON.parse(localStorage.getItem("counter"));
-let itemsFromLocalStorage = getFromBin();
-let counterFromLocalStorage = itemsFromLocalStorage.length;
-const listSection = document.querySelector("#view-section");
+function loading() {
+  let spinner = document.getElementById("loading");
+  if (spinner.style.display === "none") {
+    spinner.style.display = "block";
+  } else {
+    spinner.style.display = "none";
+  }
+}
+// ON LOAD FUNCTION
+window.addEventListener("DOMContentLoaded", async (e) => {
+  loading();
+  try {
+    getFromBin(GET_URL).then((response) => {
+      JSONbinLoad(response);
+    });
+    getFromBin(GET_DONE).then((response) => {
+      doneItemsArray.push(response);
+    });
+  } catch (error) {
+    console.error(error);
+    alert("opps! something went wrong... error:" + error);
+  }
+});
 
-// TODO CONTAINER
-const addContainerDiv = function () {
-  let todoContainer = document.createElement("div");
-  todoContainer.classList.add("todo-container");
-  listSection.appendChild(todoContainer);
-  addTextDiv(todoContainer);
-  addCheckBox(todoContainer);
-};
+//LOAD FROM JSONbin function
+let JSONbinLoad = function (response) {
+  let dataFromJSONBin = response;
+  if (dataFromJSONBin.length === 0) {
+    loading();
+    return;
+  }
+  counter = dataFromJSONBin.length;
+  itemsArray = dataFromJSONBin;
+  const counterSpan = document.getElementById("counter");
+  counterSpan.innerText = dataFromJSONBin.length;
+  const listSection = document.querySelector("#view-section");
+  for (let i = 0; i < dataFromJSONBin.length; i++) {
+    //add the container div
+    const todoContainer = document.createElement("div");
+    todoContainer.classList.add("todo-container");
+    todoContainer.setAttribute("id", "div" + dataFromJSONBin[i].counter);
+    console.log(dataFromJSONBin[i].counter);
+    listSection.appendChild(todoContainer);
 
-// ADDING CHECK-BOX
-const addCheckBox = function (todoContainer) {
-  let taskCheck = document.createElement("input");
-  taskCheck.setAttribute("type", "checkbox");
-  taskCheck.className = "taskCheck";
-  todoContainer.appendChild(taskCheck);
+    // adding data-percentage and class to sort them later by priority
+    todoContainer.setAttribute("data-percentage", dataFromJSONBin[i].priority);
+
+    // adding a check box
+    const taskCheck = document.createElement("input");
+    taskCheck.setAttribute("type", "checkbox");
+    taskCheck.setAttribute("id", dataFromJSONBin[i].counter);
+    todoContainer.appendChild(taskCheck);
+
+    // adding the text
+    const todoText = document.createElement("div");
+    todoText.classList.add("todo-text");
+    todoContainer.appendChild(todoText);
+
+    // adding the time
+    const todoCreatedAt = document.createElement("div");
+    todoCreatedAt.classList.add("todo-created-at");
+    todoContainer.appendChild(todoCreatedAt);
+
+    // adding the priority
+    const todoPriority = document.createElement("div");
+    todoPriority.classList.add("todo-priority");
+    todoContainer.appendChild(todoPriority);
+
+    todoText.innerText = dataFromJSONBin[i].text;
+    todoCreatedAt.innerText = dataFromJSONBin[i].date;
+    todoPriority.innerText = dataFromJSONBin[i].priority;
+  }
+  loading();
 };
 
 // TODO TEXT DIV
-const addTextDiv = async function (todoContainer) {
+const addTextDiv = async function () {
+  loading();
   let inputValue = document.getElementById("text-input").value;
   inputValue.required = true;
-  let todoText = document.createElement("div");
-  todoText.innerText = inputValue;
-  todoText.classList.add("todo-text");
-  todoContainer.appendChild(todoText);
   document.getElementById("text-input").value = "";
   document.getElementById("text-input").focus();
-  await addDateDiv(todoContainer, inputValue);
+  await addDateDiv(inputValue);
 };
 
 //TODO DATE DIV
-const addDateDiv = async function (todoContainer, inputValue) {
-  let todoCreatedAt = document.createElement("div");
+const addDateDiv = async function (inputValue) {
   let newDate = getDate();
-  todoCreatedAt.innerText = newDate;
-  todoCreatedAt.classList.add("todo-created-at");
-  todoContainer.appendChild(todoCreatedAt);
-  await addPriority(todoContainer, inputValue, newDate);
+  await addPriority(inputValue, newDate);
 };
 
 //TODO PRIORITY DIV
-const addPriority = async function (todoContainer, inputValue, newDate) {
+const addPriority = async function (inputValue, newDate) {
   let priority = document.getElementById("priority-selector").value;
-  let todoPriority = document.createElement("div");
-  todoPriority.innerText = priority;
-  todoPriority.classList.add("todo-priority");
-  todoContainer.appendChild(todoPriority);
 
   //adding to the counter
   const counterSpan = document.getElementById("counter");
   counter++;
   counterSpan.innerText = counter;
 
-  // adding data-percentage and class to sort them later by priority
-  todoContainer.setAttribute("data-percentage", priority);
-
   //calling a function that will put all the input details in the localStorage
   await addToLocalStorage(inputValue, newDate, priority);
 };
 
-// ADD TO LOCALSTORAGE FUNCTION
+// ADD TO JSONBIN FUNCTION
 const addToLocalStorage = async function (inputValue, newDate, priority) {
   let itemsObject = {
     text: inputValue,
     date: newDate,
     priority: priority,
+    counter: counter - 1,
   };
   itemsArray.push(itemsObject);
 
-  // localStorage.setItem("counter", counter);
-  await setToBin(itemsArray);
+  try {
+    for (let i = 0; i < itemsArray.length - 1; i++) {
+      let removeDivs = document.getElementById("div" + itemsArray[i].counter);
+      removeDivs.remove();
+    }
+    setToBin(itemsArray, PUT_URL).then(
+      getFromBin(GET_URL).then((response) => {
+        JSONbinLoad(response);
+      })
+    );
+  } catch (error) {
+    alert(
+      "somthing went wrong... your task isn't saved properly. please check your network connection and try again. error:" +
+        error
+    );
+  }
 };
 
 // DATE FUNCTION
@@ -134,71 +194,9 @@ sortButton.addEventListener("click", function () {
     .appendTo(warpingDiv);
 });
 
-// DELETE BUTTON
-const deleteButton = document.getElementById("delete-button");
-deleteButton.addEventListener("click", function () {
-  let flag = false; //will change once the confirmation will be approved
-  let confirmation = false;
-  $(".taskCheck").each(async function () {
-    if ($(this).is(":checked")) {
-      if (!flag) {
-        confirmation = confirm("Are you sure you want to delete this items?");
-        flag = true;
-      }
-      if (confirmation === true) {
-        //if confirmed continue
-        let parent = $(".taskCheck:checked").closest(".todo-container");
-
-        //taking all the innerText of the div that was selected in order
-        //to find the wanted item in the storage
-        let localStorageIndex = await getFromBin();
-        for (let i = 0; i < parent.length; i++) {
-          let divInnerText = parent[i].innerText;
-          //modify the date to look the same
-          let arrayDiv = divInnerText.split("\n");
-          let declarationDate = arrayDiv[1].split(" ").join("");
-          // let localStorageIndex = JSON.parse(localStorage.getItem("items"));
-          let newItems = []; //new array that contains all the un-deleted items
-          // for (let i = 0; i < localStorageIndex.length; i++) {
-          let localValues = Object.values(localStorageIndex[i]);
-          // let localValues = localStorageIndex[i];
-          console.log(localValues);
-          console.log(localStorageIndex);
-          //modify the date to look the same
-          let declarationDateStorage = localValues[1].split(" ").join("");
-          console.log(declarationDateStorage);
-
-          //comparing the strings of the date in order to find the parallel item
-          if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
-            newItems.push(localStorageIndex[i]);
-            console.log(itemsArray);
-          }
-          // }
-          itemsArray = newItems;
-          //putting the items that use not deleted in the storage
-          // let newItemsJSON = JSON.stringify(newItems);
-
-          //change the counter
-          document.getElementById("counter").innerText = itemsArray.length;
-          // localStorage.setItem("counter", newItems.length);
-          // localStorage.setItem("items", newItemsJSON);
-        }
-
-        //removing from the page without reload
-        $(".taskCheck:checked").closest(".todo-container").remove();
-      }
-      setToBin(itemsArray);
-    }
-    return;
-  });
-  if (!confirmation) {
-    alert("please select items to delete");
-  }
-});
-
 //ADD BUTTON FUNCTION
 const addButton = document.querySelector("#add-button");
-addButton.addEventListener("click", addContainerDiv);
+addButton.addEventListener("click", addTextDiv);
 
 //ADDING USING ENTER KEY
 const input = document.getElementById("text-input");
@@ -209,193 +207,99 @@ input.addEventListener("keyup", function (event) {
   }
 });
 
-// ON LOAD FUNCTION
-window.addEventListener("DOMContentLoaded", async (e) => {
-  try {
-    await JSONbinLoad();
-  } catch (error) {
-    console.error(error);
-    alert("opps! something went wrong... error:" + error);
-    // localStorageLoad();
+// DELETE BUTTON
+const deleteButton = document.getElementById("delete-button");
+deleteButton.addEventListener("click", function () {
+  let flag = false; //will change once the confirmation will be approved
+  let confirmation = false;
+  if (!flag) {
+    confirmation = confirm("Are you sure you want to delete this items?");
+    flag = true;
+  }
+  if (confirmation) {
+    loading();
+    let newArray = [];
+    let itemCounter = 0;
+    for (let i = 0; i < itemsArray.length; i++) {
+      let checkBoxDelete = document.getElementById(itemsArray[i].counter);
+      let divDelete = document.getElementById("div" + itemsArray[i].counter);
+      console.log(divDelete);
+      if (checkBoxDelete.checked) {
+        divDelete.remove();
+        const counterSpan = document.getElementById("counter");
+        counter--;
+        counterSpan.innerText = counter;
+      } else {
+        itemsArray[i].counter = itemCounter;
+        newArray.push(itemsArray[i]);
+        checkBoxDelete.setAttribute("id", itemCounter);
+        divDelete.setAttribute("id", "div" + itemCounter);
+        itemCounter++;
+      }
+    }
+    itemsArray = newArray;
+    try {
+      setToBin(newArray, PUT_URL).then(loading);
+    } catch (error) {
+      alert(
+        "Sorry! we couldn't save your changes... please check your network connection and try again. Error:" +
+          error
+      );
+    }
+    return;
+  }
+  if (!confirmation) {
+    alert("please select items to delete");
   }
 });
 
-//LOAD FROM JSONbin function
-let JSONbinLoad = async function () {
-  let dataFromJSONBin = await getFromBin();
-  if (dataFromJSONBin.length === 0) return;
-  // let dataFromJSONBin["my-todo"] = dataFromJSONBin["my-todo"];
-  counter = dataFromJSONBin.length;
-  itemsArray = dataFromJSONBin;
-  const counterSpan = document.getElementById("counter");
-  counterSpan.innerText = dataFromJSONBin.length;
-  const listSection = document.querySelector("#view-section");
-  for (let i = 0; i < dataFromJSONBin.length; i++) {
-    //add the container div
-    const todoContainer = document.createElement("div");
-    todoContainer.classList.add("todo-container");
-    listSection.appendChild(todoContainer);
-
-    // adding data-percentage and class to sort them later by priority
-    todoContainer.setAttribute("data-percentage", dataFromJSONBin[i].priority);
-
-    // adding a check box
-    const taskCheck = document.createElement("input");
-    taskCheck.setAttribute("type", "checkbox");
-    taskCheck.className = "taskCheck";
-    todoContainer.appendChild(taskCheck);
-
-    // adding the text
-    const todoText = document.createElement("div");
-    todoText.classList.add("todo-text");
-    todoContainer.appendChild(todoText);
-
-    // adding the time
-    const todoCreatedAt = document.createElement("div");
-    todoCreatedAt.classList.add("todo-created-at");
-    todoContainer.appendChild(todoCreatedAt);
-
-    // adding the priority
-    const todoPriority = document.createElement("div");
-    todoPriority.classList.add("todo-priority");
-    todoContainer.appendChild(todoPriority);
-
-    todoText.innerText = dataFromJSONBin[i].text;
-    todoCreatedAt.innerText = dataFromJSONBin[i].date;
-    todoPriority.innerText = dataFromJSONBin[i].priority;
-  }
-};
-
-// LOCALSTORAGE function that load the saved data from the localStorage in case there
-//is a something wrong
-// let localStorageLoad = function () {
-//   if (counterFromLocalStorage === null) return;
-//   counter = counterFromLocalStorage;
-//   if (itemsFromLocalStorage === null) return;
-//   itemsArray = itemsFromLocalStorage;
-//   for (let i = 0; i < itemsFromLocalStorage.length; i++) {
-//     //add the container div
-//     const todoContainer = document.createElement("div");
-//     todoContainer.classList.add("todo-container");
-//     listSection.appendChild(todoContainer);
-
-//     // adding data-percentage and class to sort them later by priority
-//     todoContainer.setAttribute(
-//       "data-percentage",
-//       itemsFromLocalStorage[i].priority
-//     );
-
-//     // adding a check box
-//     const taskCheck = document.createElement("input");
-//     taskCheck.setAttribute("type", "checkbox");
-//     taskCheck.className = "taskCheck";
-//     todoContainer.appendChild(taskCheck);
-
-//     // adding the text
-//     const todoText = document.createElement("div");
-//     todoText.classList.add("todo-text");
-//     todoContainer.appendChild(todoText);
-
-//     // adding the time
-//     const todoCreatedAt = document.createElement("div");
-//     todoCreatedAt.classList.add("todo-created-at");
-//     todoContainer.appendChild(todoCreatedAt);
-
-//     // adding the priority
-//     const todoPriority = document.createElement("div");
-//     todoPriority.classList.add("todo-priority");
-//     todoContainer.appendChild(todoPriority);
-
-//     const counterSpan = document.getElementById("counter");
-
-//     todoText.innerText = itemsFromLocalStorage[i].text;
-//     todoCreatedAt.innerText = itemsFromLocalStorage[i].date;
-//     todoPriority.innerText = itemsFromLocalStorage[i].priority;
-//     counterSpan.innerText = counterFromLocalStorage;
-//   }
-// };
-
-// DONE TASK JSON BIN AND FUNCTIONS
-
-let DONE_ID = "6017d7cfabdf9c556795e64a";
-let DONE_URL = `https://api.jsonbin.io/v3/b/${DONE_ID}`;
-let doneArray = [];
-//JSONbin functions
-async function setToDone(data) {
-  const sendObject = {
-    "my-todo": data,
-  };
-  const response = await fetch(DONE_URL, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(sendObject),
-  });
-  return response.json();
-}
-
-// TASK DONE BUTTON
+// DONE BUTTON
 const doneButton = document.getElementById("done-button");
-doneButton.addEventListener("click", async function () {
+doneButton.addEventListener("click", function () {
   let flag = false; //will change once the confirmation will be approved
   let confirmation = false;
-  let itemsFromLocalStorage = await getFromBin();
-  $(".taskCheck").each(function () {
-    if ($(this).is(":checked")) {
-      if (!flag) {
-        confirmation = confirm("Did you completed this tasks?");
-        flag = true;
+  if (!flag) {
+    confirmation = confirm("Are you sure you finished this tasks?");
+    flag = true;
+  }
+  if (confirmation) {
+    let newArray = [];
+    let doneArray = [];
+    let itemCounter = 0;
+    for (let i = 0; i < itemsArray.length; i++) {
+      let checkBoxDone = document.getElementById(itemsArray[i].counter);
+      let divDone = document.getElementById("div" + itemsArray[i].counter);
+      if (checkBoxDone.checked) {
+        divDone.style.textDecoration = "line-through";
+        doneArray.push(itemsArray[i]);
+        setTimeout(divDone.remove(), 4000);
+        const counterSpan = document.getElementById("counter");
+        counter--;
+        counterSpan.innerText = counter;
+      } else {
+        itemsArray[i].counter = itemCounter;
+        newArray.push(itemsArray[i]);
+        checkBoxDone.setAttribute("id", itemCounter);
+        divDone.setAttribute("id", "div" + itemCounter);
+        itemCounter++;
       }
-      if (confirmation === true) {
-        //if confirmed continue
-        let parent = $(".taskCheck:checked").closest(".todo-container");
-        console.log(typeof parent);
-        let localStorageIndex = itemsFromLocalStorage;
-        //taking all the innerText of the div that was selected in order
-        //to find the wanted item in the storage
-        for (let i = 0; i <= parent.length; i++) {
-          let divInnerText = Object.values(parent[i]);
-          let parentStyle = parent[i].style;
-          console.log(parent[i]);
-          console.log(Object.values(parent[i]));
-          //modify the date to look the same
-          // let arrayDiv = divInnerText.split("\n");
-          let declarationDate = divInnerText[1].split(" ").join("");
-          // let localStorageIndex = JSON.parse(localStorage.getItem("items"));
-          // console.log(localStorageIndex);
-          let newItems = []; //new array that contains all the un-deleted items
-          let newDone = [];
-          // for (let i = 0; i < localStorageIndex.length; i++) {
-          let localValues = Object.values(localStorageIndex[i]);
-          //modify the date to look the same
-          let declarationDateStorage = localValues[1].split(" ").join("");
-
-          //comparing the strings of the date in order to find the parallel item
-          if (declarationDate.localeCompare(declarationDateStorage) !== 0) {
-            newItems.push(localStorageIndex[i]);
-          }
-          newDone.push(localStorageIndex[i]);
-          console.log(localStorageIndex[i]);
-          parentStyle.textDecoration = "line-through";
-          doneArray = newDone;
-          itemsArray = newItems;
-          console.log(doneArray);
-          //putting the items that use not deleted in the storage
-          // let newItemsJSON = JSON.stringify(newItems);
-
-          //change the counter
-          document.getElementById("counter").innerText = newItems.length;
-          // localStorage.setItem("counter", newItems.length);
-          // localStorage.setItem("items", newItemsJSON);
-        }
-      }
-      setToBin(itemsArray);
-      setToDone(doneArray);
+    }
+    itemsArray = newArray;
+    doneItemsArray = doneArray;
+    try {
+      loading();
+      setToBin(newArray, PUT_URL)
+        .then(setToBin(doneItemsArray, DONE_URL))
+        .then(loading());
+    } catch (error) {
+      alert(
+        "Sorry! we couldn't save your changes... please check your network connection and try again. Error:" +
+          error
+      );
     }
     return;
-  });
+  }
   if (!confirmation) {
-    alert("please select items to mark as Done");
+    alert("please select items to mark as done");
   }
 });

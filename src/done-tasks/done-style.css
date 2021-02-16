@@ -12,7 +12,15 @@ body {
 #done {
   color: white;
 }
-
+#loading-section {
+  position: relative;
+}
+#loading {
+  position: relative;
+  left: 45%;
+  height: 100px;
+  width: auto;
+}
 #view-section {
   min-height: 100px;
 }
