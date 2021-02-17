@@ -8,37 +8,6 @@ let GET_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
 let DONE_URL = `https://api.jsonbin.io/v3/b/${DONE_ID}`;
 let GET_DONE = `https://api.jsonbin.io/v3/b/${DONE_ID}/latest`;
 
-//JSONbin functions
-async function setToBin(data, url) {
-  const sendObject = {
-    "my-todo": data,
-  };
-  const response = await fetch(url, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(sendObject),
-  });
-  return response.json();
-}
-
-function getFromBin(url) {
-  return fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => {
-      let binArray = response.json();
-      return binArray;
-    })
-    .then((binArray) => {
-      return binArray.record["my-todo"];
-    });
-}
-
 function loading() {
   let spinner = document.getElementById("loading");
   if (spinner.style.display === "none") {
@@ -51,10 +20,10 @@ function loading() {
 window.addEventListener("DOMContentLoaded", async (e) => {
   loading();
   try {
-    getFromBin(GET_URL).then((response) => {
+    getPersistent(GET_URL).then((response) => {
       JSONbinLoad(response);
     });
-    getFromBin(GET_DONE).then((response) => {
+    getPersistent(GET_DONE).then((response) => {
       doneItemsArray.push(response);
     });
   } catch (error) {
@@ -158,8 +127,8 @@ const addToLocalStorage = async function (inputValue, newDate, priority) {
       let removeDivs = document.getElementById("div" + itemsArray[i].counter);
       removeDivs.remove();
     }
-    setToBin(itemsArray, PUT_URL).then(
-      getFromBin(GET_URL).then((response) => {
+    setPersistent(PUT_URL, itemsArray).then(
+      getPersistent(GET_URL).then((response) => {
         JSONbinLoad(response);
       })
     );
@@ -239,7 +208,7 @@ deleteButton.addEventListener("click", function () {
     }
     itemsArray = newArray;
     try {
-      setToBin(newArray, PUT_URL).then(loading);
+      setPersistent(PUT_URL, newArray).then(loading);
     } catch (error) {
       alert(
         "Sorry! we couldn't save your changes... please check your network connection and try again. Error:" +
@@ -288,8 +257,8 @@ doneButton.addEventListener("click", function () {
     doneItemsArray = doneArray;
     try {
       loading();
-      setToBin(newArray, PUT_URL)
-        .then(setToBin(doneItemsArray, DONE_URL))
+      setPersistent(PUT_URL, newArray)
+        .then(setPersistent(DONE_URL, doneItemsArray))
         .then(loading());
     } catch (error) {
       alert(
